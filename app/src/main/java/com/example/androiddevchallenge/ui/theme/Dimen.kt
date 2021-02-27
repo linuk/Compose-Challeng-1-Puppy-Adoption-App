@@ -15,12 +15,11 @@
  */
 package com.example.androiddevchallenge.ui.theme
 
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Shapes
 import androidx.compose.ui.unit.dp
 
-val shapes = Shapes(
-    small = RoundedCornerShape(4.dp),
-    medium = RoundedCornerShape(8.dp),
-    large = RoundedCornerShape(12.dp)
-)
+object Dimen {
+    val tiny = 4.dp
+    val small = 8.dp
+    val medium = 12.dp
+    val large = 16.dp
+}
