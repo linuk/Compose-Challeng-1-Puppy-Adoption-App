@@ -18,8 +18,12 @@ package com.example.androiddevchallenge.ui.theme
 import androidx.compose.ui.unit.dp
 
 object Dimen {
-    val tiny = 4.dp
+    val xxxxsmall = 0.5.dp
+    val xxxsmall = 1.dp
+    val xxsmall = 2.dp
+    val xsmall = 4.dp
     val small = 8.dp
     val medium = 12.dp
     val large = 16.dp
+    val xxxlarge = 48.dp
 }

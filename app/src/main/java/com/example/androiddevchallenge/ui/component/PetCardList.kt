@@ -1,52 +1,55 @@
+/*
+ * Copyright 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.example.androiddevchallenge.ui.component
 
-import androidx.compose.foundation.background
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.androiddevchallenge.model.Fixtures
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.ImageBitmap
 import com.example.androiddevchallenge.model.Pet
 import com.example.androiddevchallenge.ui.theme.Dimen
-import com.example.androiddevchallenge.ui.theme.MyTheme
 
-private val CARD_SPACE = Dimen.large
+val CARD_SPACE = Dimen.large
+private const val INDEX_UNCHECKED = -1
 
+@ExperimentalAnimationApi
 @Composable
-fun PetCardList(pets: List<Pet>) {
+fun PetCardList(
+    pets: List<Pet>,
+    onPetShown: (pet: Pet, callback: (ImageBitmap) -> Unit) -> Unit
+) {
+    val clickedIndex = remember { mutableStateOf(INDEX_UNCHECKED) }
+
     LazyColumn(
         contentPadding = PaddingValues(CARD_SPACE)
     ) {
-        items(pets) {
-            PetCard(name = it.name, description = it.description)
-            Spacer(Modifier.height(CARD_SPACE).fillMaxWidth())
-        }
-    }
-}
-
-@Preview("Light Theme", widthDp = 360, heightDp = 640)
-@Composable
-fun PetCardListLightPreview() {
-    MyTheme {
-        Surface(Modifier.background(MaterialTheme.colors.background)) {
-            PetCardList(Fixtures.PET_LIST)
-        }
-    }
-}
-
-@Preview("Dark Theme", widthDp = 360, heightDp = 640)
-@Composable
-fun PetCardListDarkPreview() {
-    MyTheme(darkTheme = true) {
-        Surface(Modifier.background(MaterialTheme.colors.background)) {
-            PetCardList(Fixtures.PET_LIST)
+        itemsIndexed(pets) { index, pet ->
+            val isChecked = clickedIndex.value == index
+            PetCardListItem(
+                pet = pet,
+                isChecked = isChecked,
+                elevation = animateDpAsState((if (isChecked) Dimen.xxxlarge else Dimen.xxxsmall)).value,
+                onPetShown = onPetShown,
+                onClick = { clickedIndex.value = if (isChecked) INDEX_UNCHECKED else index }
+            )
         }
     }
 }
