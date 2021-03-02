@@ -16,16 +16,13 @@
 package com.example.androiddevchallenge
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import com.example.androiddevchallenge.model.PetViewModel
-import com.example.androiddevchallenge.ui.component.PetCardList
+import com.example.androiddevchallenge.ui.component.PetListScreen
 import com.example.androiddevchallenge.ui.theme.MyTheme
 
 class MainActivity : AppCompatActivity() {
@@ -34,6 +31,9 @@ class MainActivity : AppCompatActivity() {
     @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        petViewModel.loadCatBreeds(this)
+
         setContent {
             MyTheme {
                 MyApp(petViewModel)
@@ -45,12 +45,8 @@ class MainActivity : AppCompatActivity() {
 @ExperimentalAnimationApi
 @Composable
 fun MyApp(petViewModel: PetViewModel) {
-    Surface(color = MaterialTheme.colors.background) {
-        PetCardList(pets = petViewModel.petList) { pet, callback ->
-            if (pet.image == null) {
-                Log.i("TAG", "load pet ${pet.name} image")
-                petViewModel.loadImage(pet, callback)
-            }
-        }
-    }
+    PetListScreen(
+        petList = petViewModel.petList,
+        loadPetImage = petViewModel::loadImage,
+    )
 }

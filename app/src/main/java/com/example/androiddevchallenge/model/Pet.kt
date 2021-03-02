@@ -67,10 +67,4 @@ object Fixtures {
             "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%3Fid%3DOIP.R3IAG0Z7SAzTV56Xuvs1LwHaFj%26pid%3DApi&f=1"
         ),
     )
-
-    val PET_MAP = HashMap<String, Pet>().also { map ->
-        PET_LIST.map { pet ->
-            map[pet.name] = pet
-        }
-    }
 }

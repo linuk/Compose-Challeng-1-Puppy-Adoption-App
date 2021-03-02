@@ -10,4 +10,5 @@
       the License.
       -->
     <string name="app_name">AndroidDevChallenge</string>
+    <string name="pet_list_screen_title">All Cats</string>
 </resources>

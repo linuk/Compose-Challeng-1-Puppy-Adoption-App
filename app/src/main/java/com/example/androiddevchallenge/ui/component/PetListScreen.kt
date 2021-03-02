@@ -16,41 +16,23 @@
 package com.example.androiddevchallenge.ui.component
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.unit.Dp
 import com.example.androiddevchallenge.model.Pet
 
 @ExperimentalAnimationApi
 @Composable
-fun PetCardListItem(
-    pet: Pet,
-    isChecked: Boolean,
-    elevation: Dp,
-    onPetShown: (pet: Pet, callback: (ImageBitmap) -> Unit) -> Unit,
-    onClick: () -> Unit
+fun PetListScreen(
+    petList: List<Pet>,
+    loadPetImage: (imageUrl: String, (ImageBitmap) -> Unit) -> Unit,
 ) {
-    val image = remember { mutableStateOf(pet.image) }
-
-    onPetShown(pet) {
-        image.value = it
+    Surface(color = MaterialTheme.colors.background) {
+        PetCardList(petList) { pet, onPetImageLoaded ->
+            if (pet.image == null) {
+                loadPetImage(pet.imageUrl, onPetImageLoaded)
+            }
+        }
     }
-
-    PetCard(
-        bitmap = image.value,
-        name = pet.name,
-        description = pet.description,
-        elevation = elevation,
-        onClick = onClick,
-        zIndex = if (isChecked) 2.0F else 1.0F,
-        expanded = isChecked
-    )
-
-    Spacer(Modifier.height(CARD_SPACE).fillMaxWidth())
 }

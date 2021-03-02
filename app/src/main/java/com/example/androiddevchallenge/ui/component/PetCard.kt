@@ -15,18 +15,19 @@
  */
 package com.example.androiddevchallenge.ui.component
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -47,6 +48,8 @@ import com.example.androiddevchallenge.ui.theme.shapes
 import com.example.androiddevchallenge.ui.theme.typography
 
 private val PET_CARD_SHAPE = shapes.large
+private val PET_CARD_IMAGE_EXPANDED_HEIGHT = 400.dp
+private val PET_CARD_IMAGE_FOLDED_HEIGHT = 200.dp
 
 @ExperimentalAnimationApi
 @Composable
@@ -57,42 +60,53 @@ fun PetCard(
     onClick: () -> Unit = {},
     elevation: Dp = Dimen.small,
     zIndex: Float = 1.0F,
+    expanded: Boolean = true
 ) {
+    val imageHeight = animateDpAsState(
+        if (expanded) PET_CARD_IMAGE_EXPANDED_HEIGHT else PET_CARD_IMAGE_FOLDED_HEIGHT
+    ).value
+
     Surface(
         shape = PET_CARD_SHAPE,
         elevation = elevation,
-        modifier = Modifier.wrapContentHeight().zIndex(zIndex)
+        modifier = Modifier
+            .wrapContentHeight()
+            .zIndex(zIndex)
     ) {
         Column(
             modifier = Modifier
                 .clip(PET_CARD_SHAPE)
-                .clickable(onClick = onClick)
-                .background(MaterialTheme.colors.surface),
+                .clickable(onClick = onClick),
             verticalArrangement = Arrangement.Center
         ) {
             Surface(
                 color = (Color.LightGray),
-                modifier = Modifier.height(200.dp).fillMaxWidth()
+                modifier = Modifier
+                    .height(imageHeight)
+                    .fillMaxWidth()
             ) {
-                if (bitmap != null)
+                if (bitmap != null) {
                     Image(
                         modifier = Modifier.fillMaxWidth().fillMaxHeight(),
                         bitmap = bitmap,
                         contentDescription = null,
-                        contentScale = ContentScale.FillWidth
+                        contentScale = ContentScale.Crop
                     )
+                }
             }
-            Column(Modifier.padding(Dimen.medium)) {
-                Text(
-                    text = name,
-                    style = typography.h6
-                )
-                Text(
-                    maxLines = 2,
-                    text = description,
-                    style = typography.subtitle1,
-                    overflow = TextOverflow.Ellipsis
-                )
+            AnimatedVisibility(expanded) {
+                Column(Modifier.padding(Dimen.medium)) {
+                    Text(
+                        text = name,
+                        style = typography.h6
+                    )
+                    Text(
+                        maxLines = 2,
+                        text = description,
+                        style = typography.subtitle1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
         }
     }
@@ -103,10 +117,21 @@ fun PetCard(
 @Composable
 fun PetCardLightPreview() {
     MyTheme {
-        PetCard(
-            name = Fixtures.PET_LIST[0].name,
-            description = Fixtures.PET_LIST[0].description,
-            bitmap = Fixtures.PET_LIST[0].image,
-        )
+        Column {
+            PetCard(
+                name = Fixtures.PET_LIST[0].name,
+                description = Fixtures.PET_LIST[0].description,
+                bitmap = Fixtures.PET_LIST[0].image,
+            )
+
+            Spacer(Modifier.height(Dimen.medium))
+
+            PetCard(
+                name = Fixtures.PET_LIST[0].name,
+                description = Fixtures.PET_LIST[0].description,
+                bitmap = Fixtures.PET_LIST[0].image,
+                expanded = false
+            )
+        }
     }
 }

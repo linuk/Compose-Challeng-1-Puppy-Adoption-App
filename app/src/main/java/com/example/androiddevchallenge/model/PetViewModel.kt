@@ -15,6 +15,7 @@
  */
 package com.example.androiddevchallenge.model
 
+import android.content.Context
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -24,38 +25,85 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.volley.Request.Method.GET
+import com.android.volley.toolbox.JsonArrayRequest
+import com.android.volley.toolbox.Volley
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONArray
+import org.json.JSONObject
 import java.net.URL
 
 class PetViewModel : ViewModel() {
     private val map = HashMap<String, ImageBitmap>()
-    var petList by mutableStateOf(Fixtures.PET_LIST)
+    var petList by mutableStateOf<List<Pet>>(mutableListOf())
 
-    fun loadImage(pet: Pet, onImageLoaded: (ImageBitmap) -> Unit) {
-        if (map.containsKey(pet.imageUrl)) {
-            Log.i("TAG", "Reuse ${pet.name} image in loadImage")
-
-            petList = petList.toMutableList().also { newPetList ->
-                newPetList.find { it.imageUrl == pet.imageUrl }?.image = map[pet.imageUrl]
+    fun loadCatBreeds(context: Context) {
+        val stringRequest = JsonArrayRequest(
+            GET, ENDPOINT_BREEDS, null,
+            { response ->
+                petList = catBreedsListener(response)
+            },
+            { error ->
+                error.message?.let { Log.i("PetViewModel", it) }
             }
-            map[pet.imageUrl]?.let { onImageLoaded(it) }
+        )
+        Volley.newRequestQueue(context).add(stringRequest)
+    }
+
+    private fun catBreedsListener(response: JSONArray) = ArrayList<Pet>().also { list ->
+        for (i in 0 until response.length()) {
+            response.getJSONObject(i).let { breed ->
+                if (isCatBreedJSONValid(breed)) {
+                    list.add(parseBreedToPet(breed))
+                }
+            }
+        }
+    }
+
+    fun loadImage(imageUrl: String, onImageLoaded: ((ImageBitmap) -> Unit)?) {
+        if (map.containsKey(imageUrl)) {
+            petList = petList.toMutableList().also { newPetList ->
+                newPetList.find { it.imageUrl == imageUrl }?.image = map[imageUrl]
+            }
+            map[imageUrl]?.let { imageBitmap -> onImageLoaded?.let { it(imageBitmap) } }
         } else {
             viewModelScope.launch(Dispatchers.IO) {
-                val connection = URL(pet.imageUrl).openConnection()
+                val connection = URL(imageUrl).openConnection()
                 connection.useCaches = true
                 val imageBitmap = BitmapFactory.decodeStream(connection.getInputStream())
                     .asImageBitmap()
 
-                map[pet.imageUrl] = imageBitmap
+                map[imageUrl] = imageBitmap
 
                 petList = petList.toMutableList().also { newPetList ->
-                    newPetList.find { it.imageUrl == pet.imageUrl }?.image = imageBitmap
+                    newPetList.find { it.imageUrl == imageUrl }?.image = imageBitmap
                 }
 
-                onImageLoaded(imageBitmap)
-                Log.i("TAG", "Loaded ${pet.name} image")
+                onImageLoaded?.let { it(imageBitmap) }
             }
         }
+    }
+
+    companion object {
+        private const val ENDPOINT_BREEDS = "https://api.thecatapi.com/v1/breeds"
+        private const val FIELD_NAME = "name"
+        private const val FIELD_DESCRIPTION = "description"
+        private const val FIELD_IMAGE = "image"
+        private const val FIELD_URL = "url"
+
+        private fun isCatBreedJSONValid(jsonObject: JSONObject) =
+            jsonObject.has(FIELD_NAME) &&
+                jsonObject.has(FIELD_DESCRIPTION) &&
+                jsonObject.has(FIELD_IMAGE) &&
+                jsonObject.getJSONObject(FIELD_IMAGE).has(FIELD_URL)
+
+        private fun parseBreedToPet(jsonObject: JSONObject) = Pet(
+            name = jsonObject.getString(FIELD_NAME),
+            description = jsonObject.getString(FIELD_DESCRIPTION),
+            imageUrl = jsonObject.getJSONObject(FIELD_IMAGE)
+                .getString(FIELD_URL)
+                .toString()
+        )
     }
 }
