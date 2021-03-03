@@ -15,25 +15,18 @@
  */
 package com.example.androiddevchallenge.ui.component
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.layout.Column
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
-import com.example.androiddevchallenge.R
 import com.example.androiddevchallenge.model.Pet
 import com.example.androiddevchallenge.ui.theme.Dimen
 
@@ -46,22 +39,21 @@ fun PetCardList(
     pets: List<Pet>,
     onPetShown: (pet: Pet, callback: (ImageBitmap) -> Unit) -> Unit
 ) {
-    val clickedIndex = remember { mutableStateOf(INDEX_UNCHECKED) }
-    Column(Modifier.fillMaxSize()) {
-        Text(
-            modifier = Modifier.padding(horizontal = CARD_SPACE),
-            text = stringResource(id = R.string.pet_list_screen_title),
-            style = MaterialTheme.typography.h1,
-            fontWeight = FontWeight.ExtraLight,
-        )
+    AnimatedVisibility(
+        visible = pets.isNotEmpty(),
+        enter = slideInVertically(),
+    ) {
+        val clickedIndex = remember { mutableStateOf(INDEX_UNCHECKED) }
         LazyColumn(
             contentPadding = PaddingValues(CARD_SPACE)
         ) {
             itemsIndexed(pets) { index, pet ->
                 val isChecked = clickedIndex.value == index
+
                 PetCardListItem(
                     pet = pet,
                     isChecked = isChecked,
+                    visible = index >= clickedIndex.value,
                     elevation = animateDpAsState(getCardElevation(isChecked)).value,
                     onPetShown = onPetShown,
                     onClick = {
@@ -73,4 +65,4 @@ fun PetCardList(
     }
 }
 
-fun getCardElevation(isChecked: Boolean): Dp = if (isChecked) Dimen.xxxlarge else Dimen.xxxsmall
+fun getCardElevation(isChecked: Boolean): Dp = if (isChecked) Dimen.xxxlarge else Dimen.xsmall

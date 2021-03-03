@@ -16,11 +16,19 @@
 package com.example.androiddevchallenge.ui.component
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.zIndex
+import com.example.androiddevchallenge.R
 import com.example.androiddevchallenge.model.Pet
+import com.example.androiddevchallenge.ui.theme.Dimen
 
 @ExperimentalAnimationApi
 @Composable
@@ -29,9 +37,17 @@ fun PetListScreen(
     loadPetImage: (imageUrl: String, (ImageBitmap) -> Unit) -> Unit,
 ) {
     Surface(color = MaterialTheme.colors.background) {
-        PetCardList(petList) { pet, onPetImageLoaded ->
-            if (pet.image == null) {
-                loadPetImage(pet.imageUrl, onPetImageLoaded)
+        Column {
+            TopAppBar(
+                title = { Text(stringResource(id = R.string.pet_list_screen_title)) },
+                backgroundColor = MaterialTheme.colors.background,
+                elevation = Dimen.small,
+                modifier = Modifier.zIndex(100F)
+            )
+            PetCardList(petList) { pet, onPetImageLoaded ->
+                if (pet.image == null) {
+                    loadPetImage(pet.imageUrl, onPetImageLoaded)
+                }
             }
         }
     }

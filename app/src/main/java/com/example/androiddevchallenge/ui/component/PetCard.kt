@@ -22,12 +22,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -36,18 +34,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
-import com.example.androiddevchallenge.model.Fixtures
 import com.example.androiddevchallenge.ui.theme.Dimen
-import com.example.androiddevchallenge.ui.theme.MyTheme
 import com.example.androiddevchallenge.ui.theme.shapes
 import com.example.androiddevchallenge.ui.theme.typography
 
-private val PET_CARD_SHAPE = shapes.large
+val PET_CARD_SHAPE = shapes.large
 private val PET_CARD_IMAGE_EXPANDED_HEIGHT = 400.dp
 private val PET_CARD_IMAGE_FOLDED_HEIGHT = 200.dp
 
@@ -58,80 +50,44 @@ fun PetCard(
     name: String,
     description: String,
     onClick: () -> Unit = {},
-    elevation: Dp = Dimen.small,
-    zIndex: Float = 1.0F,
     expanded: Boolean = true
 ) {
     val imageHeight = animateDpAsState(
         if (expanded) PET_CARD_IMAGE_EXPANDED_HEIGHT else PET_CARD_IMAGE_FOLDED_HEIGHT
     ).value
 
-    Surface(
-        shape = PET_CARD_SHAPE,
-        elevation = elevation,
+    Column(
         modifier = Modifier
-            .wrapContentHeight()
-            .zIndex(zIndex)
+            .clip(PET_CARD_SHAPE)
+            .clickable(onClick = onClick),
+        verticalArrangement = Arrangement.Center
     ) {
-        Column(
+        Surface(
+            color = (Color.LightGray),
             modifier = Modifier
-                .clip(PET_CARD_SHAPE)
-                .clickable(onClick = onClick),
-            verticalArrangement = Arrangement.Center
+                .height(imageHeight)
+                .fillMaxWidth()
         ) {
-            Surface(
-                color = (Color.LightGray),
-                modifier = Modifier
-                    .height(imageHeight)
-                    .fillMaxWidth()
-            ) {
-                if (bitmap != null) {
-                    Image(
-                        modifier = Modifier.fillMaxWidth().fillMaxHeight(),
-                        bitmap = bitmap,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop
-                    )
-                }
-            }
-            AnimatedVisibility(expanded) {
-                Column(Modifier.padding(Dimen.medium)) {
-                    Text(
-                        text = name,
-                        style = typography.h6
-                    )
-                    Text(
-                        maxLines = 2,
-                        text = description,
-                        style = typography.subtitle1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+            if (bitmap != null) {
+                Image(
+                    modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+                    bitmap = bitmap,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
             }
         }
-    }
-}
-
-@ExperimentalAnimationApi
-@Preview("Light Theme", widthDp = 360, heightDp = 640)
-@Composable
-fun PetCardLightPreview() {
-    MyTheme {
-        Column {
-            PetCard(
-                name = Fixtures.PET_LIST[0].name,
-                description = Fixtures.PET_LIST[0].description,
-                bitmap = Fixtures.PET_LIST[0].image,
-            )
-
-            Spacer(Modifier.height(Dimen.medium))
-
-            PetCard(
-                name = Fixtures.PET_LIST[0].name,
-                description = Fixtures.PET_LIST[0].description,
-                bitmap = Fixtures.PET_LIST[0].image,
-                expanded = false
-            )
+        AnimatedVisibility(expanded) {
+            Column(Modifier.padding(Dimen.medium)) {
+                Text(
+                    text = name,
+                    style = typography.h6
+                )
+                Text(
+                    text = description,
+                    style = typography.subtitle1,
+                )
+            }
         }
     }
 }

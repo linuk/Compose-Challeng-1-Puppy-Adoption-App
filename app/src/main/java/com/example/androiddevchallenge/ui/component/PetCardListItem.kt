@@ -15,42 +15,65 @@
  */
 package com.example.androiddevchallenge.ui.component
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.example.androiddevchallenge.model.Pet
+
+const val CARD_Z_INDEX_CHECKED = 2.0F
+const val CARD_Z_INDEX_UNCHECKED = 1.0F
 
 @ExperimentalAnimationApi
 @Composable
 fun PetCardListItem(
     pet: Pet,
     isChecked: Boolean,
+    visible: Boolean = true,
     elevation: Dp,
     onPetShown: (pet: Pet, callback: (ImageBitmap) -> Unit) -> Unit,
     onClick: () -> Unit
 ) {
     val image = remember { mutableStateOf(pet.image) }
+    val bottomPadding = animateDpAsState(if (visible) CARD_SPACE else 0.dp)
 
     onPetShown(pet) {
         image.value = it
     }
 
-    PetCard(
-        bitmap = image.value,
-        name = pet.name,
-        description = pet.description,
+    Surface(
+        shape = PET_CARD_SHAPE,
         elevation = elevation,
-        onClick = onClick,
-        zIndex = if (isChecked) 2.0F else 1.0F,
-        expanded = isChecked
-    )
-
-    Spacer(Modifier.height(CARD_SPACE).fillMaxWidth())
+        modifier = Modifier.padding(bottom = bottomPadding.value)
+            .wrapContentHeight()
+            .zIndex(if (isChecked) CARD_Z_INDEX_CHECKED else CARD_Z_INDEX_UNCHECKED)
+    ) {
+        AnimatedVisibility(
+            visible = visible,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            PetCard(
+                bitmap = image.value,
+                name = pet.name,
+                description = pet.description,
+                onClick = onClick,
+                expanded = visible && isChecked
+            )
+        }
+    }
 }
